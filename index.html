@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe AI</title>
+</head>
+<body>
+    <h2>Tic Tac Toe</h2>
+
+    <select id="algo">
+        <option value="minimax">Minimax</option>
+        <option value="alphabeta">Alpha-Beta</option>
+    </select>
+
+    <div id="board"></div>
+
+    <p id="info"></p>
+
+    <button onclick="reset()">Reset</button>
+
+<script>
+let board = Array(9).fill("");
+
+function render() {
+    let html = "";
+    board.forEach((cell, i) => {
+        html += `<button onclick="play(${i})">${cell}</button>`;
+    });
+    document.getElementById("board").innerHTML = html;
+}
+
+function play(i) {
+    if (board[i] !== "") return;
+
+    fetch("/move", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            index: i,
+            algo: document.getElementById("algo").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        board = data.board;
+        render();
+        document.getElementById("info").innerText =
+            "Time: " + data.time + " | Nodes: " + data.nodes;
+    });
+}
+
+function reset() {
+    fetch("/reset", {method: "POST"})
+    .then(res => res.json())
+    .then(data => {
+        board = data.board;
+        render();
+    });
+}
+
+render();
+</script>
+</body>
+</html>
